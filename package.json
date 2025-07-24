@@ -1,6 +1,6 @@
 {
   "name": "rocateer-image-picker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "rocateer.image.picker",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
