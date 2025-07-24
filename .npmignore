@@ -1,0 +1,44 @@
+# 예제 앱 관련
+example/
+examples/
+Example/
+
+# 빌드/임시 파일
+node_modules/
+dist/
+build/
+*.log
+
+# 테스트/문서/설정 파일
+__tests__/
+coverage/
+test/
+docs/
+*.test.*
+*.spec.*
+
+# 환경/설정 파일
+.env
+.env.*
+
+# Github/workflow 관련
+.github/
+.gitignore
+.gitattributes
+
+# 개발툴/IDE 관련
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# 기타 불필요한 것들
+scripts/
+babel.config.js
+metro.config.js
+jest.config.js
+tsconfig.json
+tsconfig.build.json
+
+# OS별 자동 생성 파일
+Thumbs.db
