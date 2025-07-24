@@ -134,7 +134,14 @@
     "trailingComma": "es5",
     "useTabs": false
   },
-  "codegenConfig": null,
+  "codegenConfig": {
+    "name": "RocateerImagePickerSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.rocateerimagepicker"
+    }
+  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
