@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fitsSystemWindows="true"
+  android:orientation="vertical">
+
+  <androidx.appcompat.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:background="#FFFFFF"
+    android:title="이미지 선택"
+    android:titleTextColor="#000000"
+    android:elevation="0dp"/>
+
+  <!-- 이미지 목록을 표시할 RecyclerView -->
+  <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/image_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:layout_below="@id/toolbar"
+    android:layout_above="@id/btn_layout"
+    android:scrollbars="vertical" />
+
+  <!-- 하단 고정 버튼 -->
+  <RelativeLayout
+    android:id="@+id/btn_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layout_alignParentBottom="true"
+    android:paddingVertical="16dp"
+    android:paddingRight="20dp">
+
+    <androidx.appcompat.widget.AppCompatButton
+      android:id="@+id/btn_done"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:background="#000000"
+      android:elevation="0dp"
+      android:insetTop="0dp"
+      android:insetBottom="0dp"
+      android:minWidth="0dp"
+      android:minHeight="0dp"
+      android:paddingHorizontal="16dp"
+      android:paddingVertical="8dp"
+      android:text="선택 완료"
+      android:textColor="#FFFFFF"
+      android:textSize="12dp" />
+  </RelativeLayout>
+
+</RelativeLayout>
