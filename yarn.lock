@@ -8182,11 +8182,11 @@ __metadata:
   linkType: hard
 
 "jiti@npm:^2.4.1":
-  version: 2.4.2
-  resolution: "jiti@npm:2.4.2"
+  version: 2.5.0
+  resolution: "jiti@npm:2.5.0"
   bin:
     jiti: lib/jiti-cli.mjs
-  checksum: c6c30c7b6b293e9f26addfb332b63d964a9f143cdd2cf5e946dbe5143db89f7c1b50ad9223b77fb1f6ddb0b9c5ecef995fea024ecf7d2861d285d779cde66e1e
+  checksum: b7ba21b093879f960932a99014df2158b3f20d2c7a0d6b854afc90561d0a8c0bead7f5160af81606e2f61e945e0e4f64e04301b7350c51d88b4abdf15c68b36e
   languageName: node
   linkType: hard
 
