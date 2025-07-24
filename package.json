@@ -1,6 +1,6 @@
 {
   "name": "rocateer-image-picker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "rocateer.image.picker",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -151,15 +151,5 @@
         }
       ]
     ]
-  },
-  "codegenConfig": {
-    "name": "RocateerImagePickerSpec",
-    "type": "modules",
-    "jsSrcsDir": "src"
-  },
-  "create-react-native-library": {
-    "languages": "kotlin-objc",
-    "type": "turbo-module",
-    "version": "0.52.0"
   }
 }
