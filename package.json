@@ -1,6 +1,6 @@
 {
   "name": "rocateer-image-picker",
-  "version": "0.1.1",
+  "version": "1.0.2",
   "description": "rocateer.image.picker",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -40,7 +40,9 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "release": "release-it --only-version"
+    "release": "release-it --only-version",
+    "prepublishOnly": "npm run clean && npm run prepare",
+    "build": "bob build"
   },
   "keywords": [
     "react-native",
@@ -49,7 +51,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bae-Ki-Cheol/rocateer-image-picker.git"
+    "url": "https://github.com/rocateer/rocateer-image-picker.git"
   },
   "author": "rocket <kcbae@rocateer.com> (https://github.com/Bae-Ki-Cheol)",
   "license": "MIT",
@@ -153,10 +155,7 @@
   "codegenConfig": {
     "name": "RocateerImagePickerSpec",
     "type": "modules",
-    "jsSrcsDir": "src",
-    "android": {
-      "javaPackageName": "com.rocateerimagepicker"
-    }
+    "jsSrcsDir": "src"
   },
   "create-react-native-library": {
     "languages": "kotlin-objc",
