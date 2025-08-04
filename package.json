@@ -1,6 +1,6 @@
 {
   "name": "rocateer-image-picker",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "rocateer.image.picker",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -133,16 +133,6 @@
     "tabWidth": 2,
     "trailingComma": "es5",
     "useTabs": false
-  },
-  "codegenConfig": {
-    "nativeModule": {
-      "type": "react-native",
-      "packageName": "com.rocateerimagepicker",
-      "supportedPlatforms": [
-        "android",
-        "ios"
-      ]
-    }
   },
   "react-native-builder-bob": {
     "source": "src",
