@@ -10,24 +10,26 @@ import Photos
 // MARK: - ImagePickerView
 struct ImagePickerView: View {
   // MARK: - Properties
-  var title: String
+  var allowMultiple: Bool
+  var maxSelection: Int?
+  var checkboxTintColor: String?
   var onComplete: ([URL]?) -> Void
   var onDismiss: () -> Void
-  
+
   @State private var assets: [PHAsset] = []
   @State private var selectedAssets: [PHAsset] = []
   @State private var showCamera = false
-  
+
   private let columns: Int = 3
   private let spacing: CGFloat = 1
-  
+
   // MARK: - Body
   var body: some View {
     NavigationView {
       GeometryReader { geometry in
         let cellWidth = (geometry.size.width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
         let gridItems = Array(repeating: GridItem(.fixed(cellWidth), spacing: spacing), count: columns)
-        
+
         ScrollView {
           LazyVGrid(columns: gridItems, spacing: spacing) {
             cameraButton(cellWidth: cellWidth)
@@ -44,7 +46,7 @@ struct ImagePickerView: View {
             }
           }
         }
-        .navigationTitle(title)
+        .navigationTitle("사진 선택")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: fetchPhotos)
         .toolbar { createToolbar() }
@@ -59,9 +61,9 @@ struct ImagePickerView: View {
       }
     }
   }
-  
+
   // MARK: - UI Components
-  
+
   /// 카메라 버튼 UI (정사각형)
   private func cameraButton(cellWidth: CGFloat) -> some View {
     Button(action: { self.showCamera = true }) {
@@ -75,7 +77,7 @@ struct ImagePickerView: View {
       .clipped()
     }
   }
-  
+
   /// 사진 선택 시 보여줄 오버레이 UI
   private func selectionOverlay(for asset: PHAsset) -> some View {
     ZStack(alignment: .topTrailing) {
@@ -89,7 +91,7 @@ struct ImagePickerView: View {
             Image(systemName: "checkmark.circle.fill")
               .resizable()
               .frame(width: 24, height: 24)
-              .foregroundColor(.green)
+              .foregroundColor(self.checkboxTint())
               .padding(4)
           }
           Spacer()
@@ -97,7 +99,7 @@ struct ImagePickerView: View {
       }
     }
   }
-  
+
   /// 네비게이션 바 툴바 UI
   @ToolbarContentBuilder
   private func createToolbar() -> some ToolbarContent {
@@ -117,36 +119,48 @@ struct ImagePickerView: View {
       .disabled(selectedAssets.isEmpty)
     }
   }
-  
+
   // MARK: - Logic Methods
-  
+
   /// 사진 선택/해제 로직
   private func toggleSelection(for asset: PHAsset) {
     if let index = selectedAssets.firstIndex(of: asset) {
       selectedAssets.remove(at: index)
-    } else {
-      selectedAssets.append(asset)
+      return
     }
+
+    // Not selected yet
+    if !allowMultiple {
+      // Single selection: replace selection
+      selectedAssets = [asset]
+      return
+    }
+
+    // Multiple selection
+    if let limit = maxSelection, limit > 0 {
+      if selectedAssets.count >= limit { return }
+    }
+    selectedAssets.append(asset)
   }
-  
+
   /// 갤러리에서 사진을 가져오는 로직
   private func fetchPhotos() {
     let fetchOptions = PHFetchOptions()
     fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
     let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
-    
+
     var fetchedAssets: [PHAsset] = []
     fetchResult.enumerateObjects { asset, _, _ in
       fetchedAssets.append(asset)
     }
     self.assets = fetchedAssets
   }
-  
+
   /// 여러 개의 PHAsset을 URL 배열로 변환하는 로직
   private func getURLs(for assets: [PHAsset], completion: @escaping ([URL]) -> Void) {
     let group = DispatchGroup()
     var urls: [URL] = []
-    
+
     for asset in assets {
       group.enter()
       asset.requestContentEditingInput(with: nil) { input, _ in
@@ -156,10 +170,18 @@ struct ImagePickerView: View {
         group.leave()
       }
     }
-    
+
     group.notify(queue: .main) {
       completion(urls)
     }
+  }
+
+  // MARK: - Helpers
+  private func checkboxTint() -> Color {
+    if let hex = checkboxTintColor, let ui = UIColor(hexString: hex) {
+      return Color(uiColor: ui)
+    }
+    return Color.green
   }
 }
 
@@ -168,7 +190,7 @@ struct PhotoThumbnailView: View {
   let asset: PHAsset
   let cellWidth: CGFloat
   @State private var image: Image?
-  
+
   var body: some View {
     ZStack {
       if let image = image {
@@ -184,14 +206,14 @@ struct PhotoThumbnailView: View {
     .clipped()
     .onAppear(perform: loadImage)
   }
-  
+
   private func loadImage() {
     let manager = PHImageManager.default()
     let size = CGSize(width: cellWidth * UIScreen.main.scale, height: cellWidth * UIScreen.main.scale)
     let options = PHImageRequestOptions()
     options.isSynchronous = false
     options.deliveryMode = .opportunistic
-    
+
     manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: options) { result, _ in
       if let result = result {
         self.image = Image(uiImage: result)
@@ -199,8 +221,34 @@ struct PhotoThumbnailView: View {
     }
   }
 }
+
+extension UIColor {
+  convenience init?(hexString: String) {
+    var str = hexString.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+    if str.hasPrefix("#") { str.removeFirst() }
+
+    var alpha: UInt64 = 255
+    var rgb: UInt64 = 0
+
+    if str.count == 6 {
+      guard Scanner(string: str).scanHexInt64(&rgb) else { return nil }
+    } else if str.count == 8 {
+      guard Scanner(string: str).scanHexInt64(&rgb) else { return nil }
+      alpha = rgb & 0xFF
+      rgb = rgb >> 8
+    } else {
+      return nil
+    }
+
+    let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+    let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+    let b = CGFloat(rgb & 0x0000FF) / 255.0
+    let a = CGFloat(alpha) / 255.0
+
+    self.init(red: r, green: g, blue: b, alpha: a)
+  }
+}
 //#Preview {
 //  ImagePickerView(title: "") {
 //  }
 //}
-

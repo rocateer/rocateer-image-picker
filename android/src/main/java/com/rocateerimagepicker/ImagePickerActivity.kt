@@ -37,6 +37,9 @@ class ImagePickerActivity : AppCompatActivity() {
   private lateinit var adapter: ImageAdapter
   private val images = mutableListOf<Uri>()
   private val selectedImages = mutableSetOf<Uri>()
+  private var allowMultiple: Boolean = false
+  private var maxSelection: Int = -1 // -1 = unlimited
+  private var checkboxTintColor: String? = null
 
   private lateinit var photoUri: Uri
   private lateinit var cameraLauncher: ActivityResultLauncher<Intent>
@@ -45,6 +48,10 @@ class ImagePickerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_image_picker)
+    // Receive options from native module
+    allowMultiple = intent.getBooleanExtra("allow_multiple", false)
+    maxSelection = intent.getIntExtra("max_selection", -1)
+    checkboxTintColor = intent.getStringExtra("checkbox_tint_color")
 
     val toolbar = findViewById<Toolbar>(R.id.toolbar)
     setSupportActionBar(toolbar)
@@ -69,6 +76,13 @@ class ImagePickerActivity : AppCompatActivity() {
       onImageClick = { uri -> selectImage(uri) }
     )
     recyclerView.adapter = adapter
+    // Optional: pass tint to adapter if it exposes a setter (ignore if not supported)
+    try {
+      val method = adapter.javaClass.getMethod("setCheckboxTintColor", String::class.java)
+      method.invoke(adapter, checkboxTintColor)
+    } catch (_: Exception) {
+      // Adapter does not support tint setter; ignore gracefully
+    }
 
     val btnDone = findViewById<AppCompatButton>(R.id.btn_done)
     btnDone.setOnClickListener {
@@ -250,9 +264,26 @@ class ImagePickerActivity : AppCompatActivity() {
   private fun selectImage(uri: Uri) {
     if (selectedImages.contains(uri)) {
       selectedImages.remove(uri)
-    } else {
-      selectedImages.add(uri)
+      adapter.notifyDataSetChanged()
+      return
     }
+
+    // Not yet selected
+    if (!allowMultiple) {
+      // Single selection: keep only the latest one
+      selectedImages.clear()
+      selectedImages.add(uri)
+      adapter.notifyDataSetChanged()
+      return
+    }
+
+    // Multiple selection with optional cap
+    if (maxSelection > 0 && selectedImages.size >= maxSelection) {
+      Toast.makeText(this, "최대 ${maxSelection}장까지 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+      return
+    }
+
+    selectedImages.add(uri)
     adapter.notifyDataSetChanged()
   }
 

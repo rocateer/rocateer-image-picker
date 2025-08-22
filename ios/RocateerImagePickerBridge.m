@@ -2,8 +2,8 @@
 
 @interface RCT_EXTERN_MODULE(RocateerImagePicker, NSObject)
 
-RCT_EXTERN_METHOD(openImagePicker:(NSString *)title
-                  resolve:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(open:(NSDictionary *)options
+                  resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 

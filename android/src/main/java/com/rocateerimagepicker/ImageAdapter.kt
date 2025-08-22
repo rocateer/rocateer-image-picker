@@ -8,6 +8,9 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import android.content.res.ColorStateList
+import android.graphics.Color
+import androidx.core.widget.ImageViewCompat
 
 class ImageAdapter(
   private val items: List<Uri>,
@@ -16,9 +19,16 @@ class ImageAdapter(
   private val onImageClick: (Uri) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+  private var checkboxTintColor: String? = null
+
   companion object {
     private const val VIEW_TYPE_CAMERA = 0
     private const val VIEW_TYPE_IMAGE = 1
+  }
+
+  fun setCheckboxTintColor(hex: String?) {
+    checkboxTintColor = hex
+    notifyDataSetChanged()
   }
 
   override fun getItemCount() = items.size + 1  // +1 for camera button
@@ -51,7 +61,7 @@ class ImageAdapter(
     }
   }
 
-  class ImageViewHolder(itemView: View, private val onImageClick: (Uri) -> Unit) :
+  inner class ImageViewHolder(itemView: View, private val onImageClick: (Uri) -> Unit) :
     RecyclerView.ViewHolder(itemView) {
     private val imageView: AppCompatImageView = itemView.findViewById(R.id.image_view)
     private val overlay: View = itemView.findViewById(R.id.selection_View) // 반투명 오버레이뷰
@@ -64,6 +74,19 @@ class ImageAdapter(
 
       overlay.isVisible = isSelected
       imageCheck.isVisible = isSelected
+
+      if (imageCheck.isVisible) {
+        val color = try {
+          checkboxTintColor?.let { Color.parseColor(it) }
+        } catch (_: IllegalArgumentException) { null }
+        if (color != null) {
+          ImageViewCompat.setImageTintList(imageCheck, ColorStateList.valueOf(color))
+        } else {
+          ImageViewCompat.setImageTintList(imageCheck, null)
+        }
+      } else {
+        ImageViewCompat.setImageTintList(imageCheck, null)
+      }
 
       itemView.setOnClickListener { onImageClick(uri) }
     }

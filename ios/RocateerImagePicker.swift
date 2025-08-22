@@ -13,25 +13,34 @@ class RocateerImagePicker: NSObject {
   private var hostingController: UIViewController?
 
   // MARK: - Exported Methods
-  @objc
-  func openImagePicker(_ title: String,
-                       resolve: @escaping RCTPromiseResolveBlock,
-                       rejecter reject: @escaping RCTPromiseRejectBlock) {
+  @objc(open:resolver:rejecter:)
+  func open(_ options: NSDictionary,
+            resolver resolve: @escaping RCTPromiseResolveBlock,
+            rejecter reject: @escaping RCTPromiseRejectBlock) {
 
     self.resolve = resolve
     self.reject = reject
+
+    // Parse options
+    let allowMultiple = (options["allowMultiple"] as? Bool) ?? false
+    let maxSelection = options["maxSelection"] as? NSNumber // nil means unlimited when multiple
+    let checkboxTintColor = options["checkboxTintColor"] as? String
 
     let requiredAccessLevel: PHAccessLevel = .readWrite
     let status = PHPhotoLibrary.authorizationStatus(for: requiredAccessLevel)
 
     switch status {
     case .authorized, .limited:
-      self.presentImagePicker(title: title)
+      self.presentImagePicker(allowMultiple: allowMultiple,
+                              maxSelection: maxSelection,
+                              checkboxTintColor: checkboxTintColor)
 
     case .notDetermined:
       PHPhotoLibrary.requestAuthorization(for: requiredAccessLevel) { newStatus in
         if newStatus == .authorized || newStatus == .limited {
-          self.presentImagePicker(title: title)
+          self.presentImagePicker(allowMultiple: allowMultiple,
+                                  maxSelection: maxSelection,
+                                  checkboxTintColor: checkboxTintColor)
         } else {
           self.reject?("PERMISSION_DENIED", "User denied photo library access.", nil)
         }
@@ -51,15 +60,20 @@ class RocateerImagePicker: NSObject {
   }
 
   // MARK: - Private Helper Methods
-  private func presentImagePicker(title: String) {
+  private func presentImagePicker(allowMultiple: Bool,
+                                  maxSelection: NSNumber?,
+                                  checkboxTintColor: String?) {
     DispatchQueue.main.async {
       guard let rootVC = UIApplication.shared.keyWindow?.rootViewController else {
         self.reject?("NO_ROOT_VC", "Root view controller not found", nil)
         return
       }
 
+      // Build the SwiftUI view, passing the options through.
       let imagePickerView = ImagePickerView(
-        title: title,
+        allowMultiple: allowMultiple,
+        maxSelection: maxSelection?.intValue,
+        checkboxTintColor: checkboxTintColor,
         onComplete: { selectedImageURLs in
           if let urls = selectedImageURLs {
             let urlStrings = urls.map { $0.absoluteString }
@@ -70,7 +84,8 @@ class RocateerImagePicker: NSObject {
           self.dismiss()
         },
         onDismiss: {
-          self.reject?("CANCELLED", "User cancelled the image picker.", nil)
+          // Align with JS wrapper expectation: cancel -> empty array
+          self.resolve?([])
           self.dismiss()
         }
       )
